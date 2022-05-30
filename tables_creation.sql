@@ -69,38 +69,36 @@ create table if not exists boyscout_annual_fee(
 );
 
 create table if not exists organization_activity (
+	id int generated always as identity primary key,
 	organization_name varchar(100) references organization,
+	description varchar(100),
 	start_date date,
 	duration int,
 	price float(2),
 	location varchar(100),
-	phone varchar(20),
-	primary key (organization_name, start_date)
+	phone varchar(20)
 );
 
 create table if not exists group_activity (
+	id int generated always as identity primary key,
 	group_name varchar(100) references scout_group,
+	description varchar(100),
 	start_date date,
 	duration int,
 	price float(2),
 	location varchar(100),
-	phone varchar(20),
-	primary key (group_name, start_date)
+	phone varchar(20)
 );
 
 create table if not exists organization_activity_category(
-	organization_name varchar(100),
-	start_date date,
+	id int,
 	category_allowed varchar(100) references category,
-	foreign key(organization_name, start_date)  references organization_activity (organization_name, start_date),
-	primary key (organization_name, start_date, category_allowed)
+	primary key (id, category_allowed)
 );
 
 create table if not exists group_activity_category(
-	group_name varchar(100),
-	start_date date,
+	id int,
 	category_allowed varchar(100) references category,
-	foreign key(group_name, start_date)  references group_activity (group_name, start_date),
-	primary key (group_name, start_date, category_allowed)
+	primary key (id, category_allowed)
 );
 
