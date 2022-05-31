@@ -3,7 +3,7 @@ import pandas.io.sql as sqlio
 import psycopg2
 from datetime import date
 import calendar
-
+from PIL import Image
 
 url_github = 'https://github.com/michaelfidanza'
 
@@ -21,14 +21,9 @@ st.write("")
 conn = psycopg2.connect(dbname='scout', user='sa', host='localhost', password='revihcra1!')
 cur = conn.cursor()
 
-
-# col1, col2 = st.columns(2)
-
-# with col1:
-#     visualize_data = st.checkbox('Visualize DATA', value=False)
-# with col2:
-#     insert_data = st.checkbox('Insert DATA', value=False)
-
+# show conceptual schema
+image = Image.open('database_project_last_version.jpg')
+st.image(image)
 
 operation = st.selectbox('Choose the operation', ['Visualize DATA', 'Insert DATA'])
 
@@ -38,12 +33,12 @@ tables_in_db = sqlio.read_sql_query("SELECT table_name\
                         WHERE table_schema='public'\
                         AND table_type='BASE TABLE';", conn)
 
-st.columns(1)
 
 # create a dictionary containing all dataframes for each table in the DB
 tables_dict = {}
 for table in tables_in_db.table_name:
         tables_dict[table] = sqlio.read_sql_query('Select * from ' + table, conn)
+
 
 if 'Visualize' in operation:
     # let the used decide which tables to look at
@@ -53,7 +48,7 @@ if 'Visualize' in operation:
     col = 1
     
     for table in tables_to_visualize:
-        #data = sqlio.read_sql_query("SELECT * FROM " + table + ";", conn)
+        
         if col == 1:
             with col1:
                 st.write(table)
@@ -85,7 +80,7 @@ if 'Insert' in operation:
     st.subheader('Input parameters')
 
     if table_to_insert_data == 'nation':
-        user_inputs['nation'] = "'" + (st.text_input('Insert the name of the nation')) + "'"
+        user_inputs['name'] = "'" + (st.text_input('Insert the name of the nation')) + "'"
     
     elif table_to_insert_data == 'organization':
         user_inputs['name'] = "'" + (st.text_input('Insert the name of the organization')) + "'"
@@ -132,7 +127,7 @@ if 'Insert' in operation:
         user_inputs['group_name'] = "'" + st.selectbox('Select the scout group', tables_dict['scout_group'].name) + "'"
     
     elif table_to_insert_data == 'adult': 
-        user_inputs['name'] = "'" + st.text_input('Insert the name of the boyscout') + "'"
+        user_inputs['name'] = "'" + st.text_input('Insert the name of the adult') + "'"
         user_inputs['surname'] = "'" + st.text_input('Insert the surname') + "'"
         user_inputs['phone'] = "'" + st.text_input('Insert the phone number') + "'"
         user_inputs['emergency_contact'] = "'" + st.text_input('Insert the emergency contact') + "'"
@@ -229,8 +224,10 @@ if 'Insert' in operation:
     
     elif table_to_insert_data == 'group_activity_category':
         if len(tables_dict['group_activity'].id) > 0 :
-            user_inputs['id'] = "'" + str(st.selectbox('Choose the activity you want to add a category to', tables_dict['group_activity'].id.map(lambda x : str(x)) + ": " \
-            + tables_dict['group_activity'].description + " organized by " + tables_dict['group_activity'].group_name + " on " + tables_dict['group_activity'].start_date)) + "'"
+            
+            user_inputs['id'] = int(st.selectbox('Choose the activity you want to add a category to', tables_dict['group_activity'].id.map(lambda x : str(x)) + ": " \
+            + tables_dict['group_activity'].description + " organized by " + tables_dict['group_activity'].group_name + " on " + str(tables_dict['group_activity'].start_date)).split(':')[0])
+            
             user_inputs['category_allowed'] = "'" + st.selectbox('Choose a category which is allowed to participate to the event', tables_dict['category'].name) + "'"
         else:
             st.markdown("<h6 style='text-align: left; color: red;'>There are no activity organized by scout groups yet</h6>", unsafe_allow_html=True)
@@ -249,6 +246,7 @@ if 'Insert' in operation:
     columns = user_inputs.keys()
     values = user_inputs.values()
 
+    # transform keys of the dict in columns to insert
     str_columns = ""
     for col in columns:
         if str_columns == "":
@@ -256,6 +254,7 @@ if 'Insert' in operation:
         else:
             str_columns = str_columns + "," + col
     
+    # values of dict to insert inside DB
     str_values = ""
     for value in values:
         if str_values == "":
@@ -263,22 +262,16 @@ if 'Insert' in operation:
         else:
             str_values = str_values + "," + str(value)  
     
+
     insert_data_trigger = st.button('Insert data')
     
     if insert_data_trigger:
-        st.write("INSERT INTO " + table_to_insert_data + " (" + str_columns + ") VALUES (" + str_values + ")")
-        #cur.execute("INSERT INTO " + table_to_insert_data + " (" + user_inputs.keys + ") VALUES (" + user_inputs.values + ")")
+        cur.execute("INSERT INTO " + table_to_insert_data + " (" + str_columns + ") VALUES (" + str_values + ")")
+        # Make the changes to the database persistent
+        conn.commit()
 
-# print(data.head())
-# cur.execute("SELECT * FROM adult;")
-# print(cur.fetchone())
-
-# cur.execute("INSERT INTO test (num, data) VALUES (%s, %s)", (100, "abc'def"))
-
-
-
-# # Make the changes to the database persistent
-#conn.commit()
+        
+        
 
 # Close communication with the database
 cur.close()
