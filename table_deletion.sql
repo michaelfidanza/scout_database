@@ -8,9 +8,13 @@ drop table group_activity_category;
 
 drop table organization_activity_category;
 
+drop table activity_category;
+
 drop table group_activity;
 
 drop table organization_activity;
+
+drop table activity;
 
 drop table scout_group cascade;
 

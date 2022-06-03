@@ -1,5 +1,5 @@
 
--- function that given a birt date, returns the age of the person
+-- function that given a birth date, returns the age of the person
 create or replace function age_calc(birthdate date)
   returns int
 as
@@ -9,6 +9,15 @@ begin
 end;
 $func$ language plpgsql;
 
+-- function that given a scout group, returns the organization
+create or replace function org_by_group(group_name varchar(100))
+  returns varchar(100)
+as
+$func$
+begin
+	RETURN (select o."name"  from scout_group sg join group_zone gz on sg.zone_id = gz.id join organization o on gz.organization_name = o."name"  where sg."name"  = group_name);
+end;
+$func$ language plpgsql;
 
 --function that given a birth date, returns the category for a boy scout (if in age range (9-21))
 create or replace function category_by_age(birthdate date)

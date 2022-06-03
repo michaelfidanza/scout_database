@@ -21,9 +21,7 @@ st.write("")
 conn = psycopg2.connect(dbname='scout', user='sa', host='localhost', password='revihcra1!')
 cur = conn.cursor()
 
-# show conceptual schema
-image = Image.open('database_project_last_version.jpg')
-st.image(image)
+
 
 operation = st.selectbox('Choose the operation', ['Visualize DATA', 'Insert DATA'])
 
@@ -39,6 +37,14 @@ tables_dict = {}
 for table in tables_in_db.table_name:
         tables_dict[table] = sqlio.read_sql_query('Select * from ' + table, conn)
 
+
+tables_dict['group_activity'].start_date = tables_dict['group_activity'].start_date.map(lambda x : str(x))
+tables_dict['organization_activity'].start_date = tables_dict['organization_activity'].start_date.map(lambda x : str(x))
+
+
+# show conceptual schema
+image = Image.open('database_project_last_version.jpg')
+st.image(image)
 
 if 'Visualize' in operation:
     # let the used decide which tables to look at
@@ -158,8 +164,8 @@ if 'Insert' in operation:
         user_inputs['year_to_pay'] = st.selectbox('Insert new year', range(date.today().year + 1, date.today().year - 100, -1), 0 )
     
     elif table_to_insert_data == 'boyscout_annual_fee':
-        user_inputs['boyscout_name'] = "'" + st.selectbox('Choose the boyscout who has paid', tables_dict['boyscout'].id.map(lambda x : str(x)) + ': ' + tables_dict['boyscout'].name \
-            + " " + tables_dict['boyscout'].surname + ", " + tables_dict['boyscout'].group_name) + "'"
+        user_inputs['boyscout_id'] = int(st.selectbox('Choose the boyscout who has paid', tables_dict['boyscout'].id.map(lambda x : str(x)) + ': ' + tables_dict['boyscout'].name \
+            + " " + tables_dict['boyscout'].surname + ", " + tables_dict['boyscout'].group_name).split(':')[0])
         user_inputs['year_paid'] = "'" + str(st.selectbox('Choose the year that has been paid', tables_dict['year_to_pay'].year_to_pay)) + "'"
     
     elif table_to_insert_data == 'group_activity':
@@ -226,7 +232,7 @@ if 'Insert' in operation:
         if len(tables_dict['group_activity'].id) > 0 :
             
             user_inputs['id'] = int(st.selectbox('Choose the activity you want to add a category to', tables_dict['group_activity'].id.map(lambda x : str(x)) + ": " \
-            + tables_dict['group_activity'].description + " organized by " + tables_dict['group_activity'].group_name + " on " + str(tables_dict['group_activity'].start_date)).split(':')[0])
+            + tables_dict['group_activity'].description + " organized by " + tables_dict['group_activity'].group_name + " on " + tables_dict['group_activity'].start_date).split(':')[0])
             
             user_inputs['category_allowed'] = "'" + st.selectbox('Choose a category which is allowed to participate to the event', tables_dict['category'].name) + "'"
         else:
@@ -270,7 +276,7 @@ if 'Insert' in operation:
         # Make the changes to the database persistent
         conn.commit()
 
-        
+        st.experimental_rerun()
         
 
 # Close communication with the database
