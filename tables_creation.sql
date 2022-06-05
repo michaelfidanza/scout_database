@@ -1,3 +1,4 @@
+
 --table creation script
 
 create table if not exists Year_to_pay(
@@ -79,6 +80,18 @@ create table if not exists organization_activity (
 	phone varchar(20) not null
 );
 
+create table if not exists group_activity (
+	id int generated always as identity primary key,
+	group_name varchar(100) not null references scout_group,
+	description varchar(100) not null,
+	start_date date not null,
+	duration int not null,
+	price float(2) not null,
+	location varchar(100) not null,
+	phone varchar(20) not null
+);
+
+/*
 create table if not exists activity (
 	id int generated always as identity primary key,
 	activity_type varchar(5) not null constraint check_activity_type check (activity_type in ('group', 'org')),
@@ -91,17 +104,7 @@ create table if not exists activity (
 	location varchar(100) not null,
 	phone varchar(20) not null
 );
-
-create table if not exists group_activity (
-	id int generated always as identity primary key,
-	group_name varchar(100) not null references scout_group,
-	description varchar(100) not null,
-	start_date date not null,
-	duration int not null,
-	price float(2) not null,
-	location varchar(100) not null,
-	phone varchar(20) not null
-);
+*/
 
 create table if not exists organization_activity_category(
 	id int not null references organization_activity,
@@ -115,9 +118,10 @@ create table if not exists group_activity_category(
 	primary key (id, category_allowed)
 );
 
+/*
 create table if not exists activity_category(
 	id int not null references activity,
 	category_allowed varchar(100) not null references category,
 	primary key (id, category_allowed)
 );
-
+*/

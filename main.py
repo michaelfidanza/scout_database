@@ -23,7 +23,7 @@ cur = conn.cursor()
 
 
 
-operation = st.selectbox('Choose the operation', ['Visualize DATA', 'Insert DATA'])
+operation = st.selectbox('Choose the operation', ['Visualize DATA', 'Insert DATA', 'Relevant queries'])
 
 # retrieve all the tables names from the DB
 tables_in_db = sqlio.read_sql_query("SELECT table_name\
@@ -239,8 +239,8 @@ if 'Insert' in operation:
             st.markdown("<h6 style='text-align: left; color: red;'>There are no activity organized by scout groups yet</h6>", unsafe_allow_html=True)
     elif table_to_insert_data == 'organization_activity_category':
         if len(tables_dict['organization_activity'].id) > 0 :
-            user_inputs['id'] = "'" + str(st.selectbox('Choose the activity you want to add a category to', tables_dict['organization_activity'].id.map(lambda x : str(x)) + ": " \
-            + tables_dict['organization_activity'].description + " organized by " + tables_dict['organization_activity'].group_name + " on " + tables_dict['organization_activity'].start_date)) + "'"
+            user_inputs['id'] = int(st.selectbox('Choose the activity you want to add a category to', tables_dict['organization_activity'].id.map(lambda x : str(x)) + ": " \
+            + tables_dict['organization_activity'].description + " organized by " + tables_dict['organization_activity'].organization_name + " on " + tables_dict['organization_activity'].start_date).split(':')[0])
             user_inputs['category_allowed'] = "'" + st.selectbox('Choose a category which is allowed to participate to the event', tables_dict['category'].name) + "'"
         else:
             st.markdown("<h6 style='text-align: left; color: red;'>There are no activity organized by organizations yet</h6>", unsafe_allow_html=True)
@@ -278,7 +278,24 @@ if 'Insert' in operation:
 
         st.experimental_rerun()
         
+else:
+    selected_query = st.selectbox('Choose which query to perform', ['1: Largest number of subscription', '2: Boyscout average age', \
+                                                                    '3: Total numb. of scout groups', '4: Total activities by category', '5: Adults per each scout in italian scout groups'])
 
+    if '1:' in selected_query:
+        query = 'select * from sub_number()'
+    elif '2:' in selected_query:
+        query = 'select * from avg_age()'
+    elif '3:' in selected_query:
+        query = 'select * from tot_group_numb()'
+    elif '4:' in selected_query:
+        query = 'select * from tot_act()'
+    else:
+        query = 'select * from heads_vs_scouts()'
+
+    temp_df = sqlio.read_sql_query(query, conn)
+    st.write(temp_df)
+    
 # Close communication with the database
 cur.close()
 conn.close()
