@@ -17,7 +17,7 @@ insert into nation values
 insert into organization values
 	('Agesci', 'Italy')
 ,	('Cngei', 'Italy')
-,	('MasciScout d''Europa', 'Italy')
+,	('MasciScout d Europa', 'Italy')
 ,	('Masci', 'Italy')
 ,	('Wosm for men', 'International')
 ,	('Waggs for women', 'International')

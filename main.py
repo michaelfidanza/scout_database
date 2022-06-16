@@ -4,6 +4,8 @@ import psycopg2
 from datetime import date
 import calendar
 from PIL import Image
+import pandas as pd
+import sqlalchemy
 
 url_github = 'https://github.com/michaelfidanza'
 
@@ -42,11 +44,14 @@ tables_dict['group_activity'].start_date = tables_dict['group_activity'].start_d
 tables_dict['organization_activity'].start_date = tables_dict['organization_activity'].start_date.map(lambda x : str(x))
 
 
-# show conceptual schema
-image = Image.open('database_project_last_version.jpg')
-st.image(image)
+
 
 if 'Visualize' in operation:
+
+    # show conceptual schema
+    image = Image.open('E-R_Schema.jpg')
+    st.image(image)
+
     # let the used decide which tables to look at
     tables_to_visualize = st.multiselect('Choose the tables you want to visualize', tables_dict.keys(), default=tables_dict.keys())
     
@@ -66,7 +71,7 @@ if 'Visualize' in operation:
                 st.write(tables_dict[table])
                 col = 1
 
-if 'Insert' in operation:
+elif 'Insert' in operation:
     # let the user decide which tables to insert data
     st.subheader('Input Table')
     table_to_insert_data = st.selectbox('Choose the table you want to add data to', tables_in_db.table_name)
@@ -188,7 +193,12 @@ if 'Insert' in operation:
                 day = st.selectbox('day', range(1,32))
         st.columns(1)
         user_inputs['start_date'] = "'" + str(year) + "-" + str(month) + "-" + str(day) + "'"  
-        user_inputs['duration'] =  "'" + st.text_input('Insert the duration') + "'"
+        user_inputs['duration'] =  st.text_input('Insert the duration', value=1)
+        try:
+            user_inputs['duration'] = int(user_inputs['duration'])
+        except:
+            st.markdown("<h6 style='text-align: left; color: red;'>The duration must be a number</h6>", unsafe_allow_html=True)
+
         user_inputs['location'] =  "'" + st.text_input('Insert the location') + "'"
         user_inputs['price'] =  st.text_input('Insert the price', value=0)
         try:
@@ -205,20 +215,24 @@ if 'Insert' in operation:
         with col1:
             year = st.selectbox('Start date of the event: year', range(date.today().year, date.today().year +2), 0)
         with col2:
-            month = st.selectbox('month', range(1, 13))
+            month = st.selectbox('month', range(1, 13), int(date.today().month) - 1)
         with col3:
             if month == 2:
                 if calendar.isleap(year):
-                    day = st.selectbox('day', range(1,30))
+                    day = st.selectbox('day', range(1,30), int(date.today().day))
                 else:
-                    day = st.selectbox('day', range(1, 29))
+                    day = st.selectbox('day', range(1, 29), int(date.today().day))
             elif month in (11, 4, 6, 9):
-                day = st.selectbox('day', range(1,31))
+                day = st.selectbox('day', range(1,31), int(date.today().day))
             else:
-                day = st.selectbox('day', range(1,32))
+                day = st.selectbox('day', range(1,32), int(date.today().day))
         st.columns(1)
         user_inputs['start_date'] = "'" + str(year) + "-" + str(month) + "-" + str(day) + "'"  
-        user_inputs['duration'] =  "'" + st.text_input('Insert the duration') + "'"
+        user_inputs['duration'] =  st.text_input('Insert the duration', value=1)
+        try:
+            user_inputs['duration'] = int(user_inputs['duration'])
+        except:
+            st.markdown("<h6 style='text-align: left; color: red;'>The duration must be a number</h6>", unsafe_allow_html=True)
         user_inputs['location'] =  "'" + st.text_input('Insert the location') + "'"
         user_inputs['price'] =  st.text_input('Insert the price', value=0)
         try:
@@ -295,7 +309,7 @@ else:
 
     temp_df = sqlio.read_sql_query(query, conn)
     st.write(temp_df)
-    
+
 # Close communication with the database
 cur.close()
 conn.close()

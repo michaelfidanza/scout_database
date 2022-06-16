@@ -7,7 +7,7 @@ create table if not exists Year_to_pay(
 );
 
 create table if not exists Nation(
-	name varchar(100),
+	name varchar(100) not null,
 	primary key(name)
 );
 
@@ -73,9 +73,9 @@ create table if not exists organization_activity (
 	id int generated always as identity primary key,
 	organization_name varchar(100) not null references organization,
 	description varchar(100) not null,
-	start_date date not null,
-	duration int not null,
-	price float(2) not null,
+	start_date date not null constraint check_org_date_is_valid check (start_date > now()),
+	duration int not null check(duration > 0),
+	price float(2) not NULL CHECK (price >= 0),
 	location varchar(100) not null,
 	phone varchar(20) not null
 );
@@ -84,12 +84,25 @@ create table if not exists group_activity (
 	id int generated always as identity primary key,
 	group_name varchar(100) not null references scout_group,
 	description varchar(100) not null,
-	start_date date not null,
-	duration int not null,
-	price float(2) not null,
+	start_date date not null constraint check_group_date_is_valid check (start_date > now()),
+	duration int not null check (duration > 0),
+	price float(2) not null check (price >= 0),
 	location varchar(100) not null,
 	phone varchar(20) not null
 );
+
+create table if not exists organization_activity_category(
+	id int not null references organization_activity,
+	category_allowed varchar(100) not null references category,
+	primary key (id, category_allowed)
+);
+
+create table if not exists group_activity_category(
+	id int not null references group_activity,
+	category_allowed varchar(100) not null references category,
+	primary key (id, category_allowed)
+);
+
 
 /*
 create table if not exists activity (
@@ -105,18 +118,6 @@ create table if not exists activity (
 	phone varchar(20) not null
 );
 */
-
-create table if not exists organization_activity_category(
-	id int not null references organization_activity,
-	category_allowed varchar(100) not null references category,
-	primary key (id, category_allowed)
-);
-
-create table if not exists group_activity_category(
-	id int not null references group_activity,
-	category_allowed varchar(100) not null references category,
-	primary key (id, category_allowed)
-);
 
 /*
 create table if not exists activity_category(
