@@ -20,13 +20,15 @@ $function$
 
 
 CREATE OR REPLACE FUNCTION public.avg_age()
- RETURNS TABLE(group_name character varying, avg_age float)
+ RETURNS TABLE(group_name character varying, total_subscription bigint, avg_age float)
  LANGUAGE plpgsql
 AS $function$
 	begin
 		RETURN QUERY
-		select b.group_name, avg(age_calc(b.birthdate))::float
+		select b.group_name, count(*), avg(age_calc(b.birthdate))::float
 		from boyscout b 
+		JOIN boyscout_annual_fee baf on b.id = baf.boyscout_id 
+		where baf.year_paid = date_part('year', now()) 
 		group by b.group_name;
 	END;
 $function$

@@ -9,30 +9,20 @@ begin
 end;
 $func$ language plpgsql;
 
--- function that given a scout group, returns the organization
-create or replace function org_by_group(group_name varchar(100))
-  returns varchar(100)
-as
-$func$
-begin
-	RETURN (select o."name"  from scout_group sg join group_zone gz on sg.zone_id = gz.id join organization o on gz.organization_name = o."name"  where sg."name"  = group_name);
-end;
-$func$ language plpgsql;
-
 --function that given a birth date, returns the category for a boy scout (if in age range (9-21))
 create or replace function category_by_age(birthdate date)
   returns text
 as
 $func$
 declare 
-	quantity integer;
+	age integer;
 begin
-	quantity := age_calc(birthdate);
-	if quantity >= 9 and quantity <= 11 then
+	age := age_calc(birthdate);
+	if age >= 9 and age <= 11 then
     	return 'L/C';
-    elsif quantity >= 12 and quantity <= 16 then
+    elsif age >= 12 and age <= 16 then
     	return 'E/G';
-    elsif quantity >= 17 and quantity <= 21 then
+    elsif age >= 17 and age <= 21 then
     	return 'R/S';
     else
     	return 'Can not be a boyscout';

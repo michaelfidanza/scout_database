@@ -10,9 +10,11 @@ group by o."name"
 order by total_subscription desc
 limit 1;
 
---average age of the boyscout subscribed to a certain group
-select b.group_name, avg(age_calc(b.birthdate))::float
+--total number and average age of the boyscout subscribed currently to a certain group
+select b.group_name, count(*), avg(age_calc(b.birthdate))::float
 from boyscout b 
+JOIN boyscout_annual_fee baf on b.id = baf.boyscout_id 
+where baf.year_paid = date_part('year', now()) 
 group by b.group_name;
 
 

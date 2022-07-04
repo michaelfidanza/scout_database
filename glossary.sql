@@ -36,7 +36,7 @@ join group_activity ga on gac.id = ga.id
 join scout_group sg on ga.group_name = sg."name" 
 join group_zone gz on sg.zone_id = gz.id 
 join organization o on gz.organization_name = o."name" 
-join nation n on o.nation_name = n."name" 
+join nation n on o.nation_name = n."name"
 group by (ga.start_date, ga.group_name, gac.category_allowed)
 order by ga.start_date, ga.group_name, gac.category_allowed;
 
